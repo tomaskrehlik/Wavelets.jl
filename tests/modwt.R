@@ -1,0 +1,6 @@
+library(wavelets)
+args<-commandArgs(TRUE)
+dat = read.csv("data/testdata.csv",header=F)
+temp = modwt(dat[,1], filter=args[1],n.levels = as.integer(args[2]), boundary = args[3])
+write.table(do.call(cbind, temp@W), file="W.csv", row.names=F, col.names=F, sep=", ")
+write.table(do.call(cbind, temp@V), file="V.csv", row.names=F, col.names=F, sep=", ")

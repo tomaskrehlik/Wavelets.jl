@@ -1,0 +1,6 @@
+library(wavelets)
+args<-commandArgs(TRUE)
+dat = read.csv("data/testdata.csv",header=F)
+temp = mra(dat[,1], filter=args[1],n.levels = as.integer(args[2]), boundary = args[3], method = args[4])
+write.table(do.call(cbind, temp@D), file="D.csv", row.names=F, col.names=F, sep=", ")
+write.table(do.call(cbind, temp@S), file="S.csv", row.names=F, col.names=F, sep=", ")

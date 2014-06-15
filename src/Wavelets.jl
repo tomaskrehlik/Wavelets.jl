@@ -1,5 +1,9 @@
 module Wavelets
 
-# package code goes here
+	include("waveletFilters.jl")
+	include("extendSeries.jl")
+	include("dwt.jl")
+	include("modwt.jl")
+	include("mra.jl")
 
 end # module
