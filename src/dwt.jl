@@ -1,7 +1,7 @@
 function dwtBackwards(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter)
   (M, ) = size(V)
   (L, ) = size(filter.h)
-  Vj = nans(2*M)
+  Vj = fill(NaN, 2*M)
   l = -2
   m = -1
   for t = 0:(M-1)
@@ -38,8 +38,8 @@ end
 
 function dwtForward(V::Vector{Float64}, filter::waveletFilter)
   (M,) = size(V)
-  Wj = nans(convert(Int64,M/2))
-  Vj = nans(convert(Int64,M/2))
+  Wj = fill(NaN, convert(Int64,M/2))
+  Vj = fill(NaN, convert(Int64,M/2))
   for (t = 0:(M/2 - 1))
     u = 2*t + 1
     Wjt = filter.h[1]*V[u+1]
@@ -76,9 +76,9 @@ function dwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASC
   end
 
   # initialize variables for pyramid algorithm
-  nBoundary = zeros(nLevels)
-  WCoefs = nans(convert(Int64,N/2), nLevels, nSeries)
-  VCoefs = nans(convert(Int64,N/2), nLevels, nSeries)
+  nBoundary = fill(0, nLevels)
+  WCoefs = fill(NaN, convert(Int64,N/2), nLevels, nSeries)
+  VCoefs = fill(NaN, convert(Int64,N/2), nLevels, nSeries)
 
   # implement the pyramid algorithm
   for i=1:nSeries

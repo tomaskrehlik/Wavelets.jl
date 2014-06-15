@@ -1,7 +1,26 @@
+type modwt
+  
+  L::Int
+  series::Int
+  level::Int
+  filter::waveletFilter
+  boundary::ASCIIString
+  W::Array{Float64, 3}
+  V::Array{Float64, 3}
+
+  function modwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
+    filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, true))
+    (L, series) = size(X)
+    (W, V) = modwtDo(X, filter, nLevels, boundary)
+    new(L, series, nLevels, filter, boundary, W, V)
+  end
+
+end
+
 function modwtForward(V::Vector{Float64}, filter::waveletFilter, j::Int)
   (N,) = size(V)
-  Wj = nans(N)
-  Vj = nans(N)
+  Wj = fill(NaN, N)
+  Vj = fill(NaN, N)
   
   for t = 0:(N-1) 
     k = t
@@ -25,7 +44,7 @@ end
 function modwtBackward(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter, j::Int)
   (N,) = size(V)
   (L,) = size(filter.h)
-  Vj = nans(N)
+  Vj = fill(NaN, N)
 
   for t = 0:(N-1)
     k = t
@@ -43,11 +62,7 @@ function modwtBackward(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFi
   return Vj
 end
 
-function modwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
-  # get wavelet coeficients and length
-  # call some function
-  filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, true))
-
+function modwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary::ASCIIString)
   # convert X to a matrix
   if isa(X, Vector)
     (N,) = size(X)
@@ -62,9 +77,9 @@ function modwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::A
   end
 
   # initialize variables for pyramid algorithm
-  nBoundary = zeros(nLevels)
-  WCoefs = zeros(N, nLevels, nSeries)
-  VCoefs = zeros(N, nLevels, nSeries)
+  nBoundary = fill(0, nLevels)
+  WCoefs = fill(0, N, nLevels, nSeries)
+  VCoefs = fill(0, N, nLevels, nSeries)
   
 
   # implement the pyramid algorithm
