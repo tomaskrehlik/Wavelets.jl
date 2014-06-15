@@ -8,8 +8,8 @@ function mra(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASC
   end
   # initializations
   
-  D = fill(0, N, nLevels, nSeries)
-  S = fill(0, N, nLevels, nSeries)
+  D = fill(0.0, N, nLevels, nSeries)
+  S = fill(0.0, N, nLevels, nSeries)
 
   # compute wavelet transform and other necessary values
   (wtW, wtV) = eval(Expr(:call, symbol(method), X, filter, 1, boundary))
@@ -21,8 +21,8 @@ function mra(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASC
   for j = 1:nLevels
     DWj = wtW
     SVj = wtV
-    SWj = fill(0, N, nLevels, nSeries)
-    DVj = fill(0, N, nLevels, nSeries)
+    SWj = fill(0.0, N, nLevels, nSeries)
+    DVj = fill(0.0, N, nLevels, nSeries)
 
     for k=j:-1:1
       for i=1:nSeries
@@ -30,7 +30,7 @@ function mra(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASC
         SVj[:,j,i] = eval(Expr(:call, symbol(string(method,"Backward")), SWj[:,j,i], SVj[:,j,i], filter, k))
       end
     
-      DWj = fill(0, N, nLevels, nSeries)
+      DWj = fill(0.0, N, nLevels, nSeries)
       SWj = DWj
     end
 

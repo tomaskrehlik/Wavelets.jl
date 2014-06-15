@@ -1,5 +1,6 @@
 type modwt
   
+  original::Array{Float64}
   L::Int
   series::Int
   level::Int
@@ -10,14 +11,18 @@ type modwt
 
   function modwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
     filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, true))
+
     if isa(X, Vector)
       (N,) = size(X)
       nSeries = 1
     else
       (N, nSeries) = size(X)
     end
+
     (W, V) = modwtDo(X, filter, nLevels, boundary, nSeries, N)
-    new(L, series, nLevels, filter, boundary, W, V)
+    
+    new(X, N, nSeries, nLevels, filter, boundary, W, V)
+
   end
 
 end
@@ -68,7 +73,6 @@ function modwtBackward(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFi
 end
 
 function modwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary::ASCIIString, nSeries::Int, N::Int)
-  
   # reflect X for reflection method
   if (boundary == "reflection")
     X = extendSeries(X, boundary)
@@ -76,11 +80,10 @@ function modwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundar
   end
 
   # initialize variables for pyramid algorithm
-  nBoundary = fill(0, nLevels)
-  WCoefs = fill(0, N, nLevels, nSeries)
-  VCoefs = fill(0, N, nLevels, nSeries)
+  nBoundary = fill(0.0, nLevels)
+  WCoefs = fill(0.0, N, nLevels, nSeries)
+  VCoefs = fill(0.0, N, nLevels, nSeries)
   
-
   # implement the pyramid algorithm
   for i=1:nSeries
     Vj = X[:,i]

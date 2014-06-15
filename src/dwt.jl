@@ -76,7 +76,7 @@ function dwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASC
   end
 
   # initialize variables for pyramid algorithm
-  nBoundary = fill(0, nLevels)
+  nBoundary = fill(0.0, nLevels)
   WCoefs = fill(NaN, convert(Int64,N/2), nLevels, nSeries)
   VCoefs = fill(NaN, convert(Int64,N/2), nLevels, nSeries)
 
