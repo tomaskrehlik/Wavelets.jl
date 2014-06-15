@@ -10,8 +10,13 @@ type modwt
 
   function modwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
     filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, true))
-    (L, series) = size(X)
-    (W, V) = modwtDo(X, filter, nLevels, boundary)
+    if isa(X, Vector)
+      (N,) = size(X)
+      nSeries = 1
+    else
+      (N, nSeries) = size(X)
+    end
+    (W, V) = modwtDo(X, filter, nLevels, boundary, nSeries, N)
     new(L, series, nLevels, filter, boundary, W, V)
   end
 
@@ -62,14 +67,8 @@ function modwtBackward(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFi
   return Vj
 end
 
-function modwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary::ASCIIString)
-  # convert X to a matrix
-  if isa(X, Vector)
-    (N,) = size(X)
-    nSeries = 1
-  else
-    (N, nSeries) = size(X)
-  end
+function modwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary::ASCIIString, nSeries::Int, N::Int)
+  
   # reflect X for reflection method
   if (boundary == "reflection")
     X = extendSeries(X, boundary)
