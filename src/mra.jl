@@ -1,13 +1,33 @@
-function mra(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString, method::ASCIIString)
-  # convert X to a matrix
-  if isa(X, Vector)
-    (N,) = size(X)
-    nSeries = 1
-  else
-    (N, nSeries) = size(X)
-  end
-  # initializations
+type mra
   
+  original::Array{Float64}
+  L::Int
+  series::Int
+  level::Int
+  filter::waveletFilter
+  boundary::ASCIIString
+  method::ASCIIString
+  D::Array{Float64, 3}
+  S::Array{Float64, 3}
+
+  function mra(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString, method::ASCIIString)
+    filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, true))
+
+    if isa(X, Vector)
+      (N,) = size(X)
+      nSeries = 1
+    else
+      (N, nSeries) = size(X)
+    end
+
+    (D, S) = mraDo(X, filter, nLevels, boundary, method, nSeries, N)
+    
+    new(X, N, nSeries, nLevels, filter, boundary, method, D, S)
+  end
+
+end
+
+function mraDo(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString, method::ASCIIString, nSeries::Int, N::Int)
   D = fill(0.0, N, nLevels, nSeries)
   S = fill(0.0, N, nLevels, nSeries)
 

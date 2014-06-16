@@ -1,3 +1,33 @@
+type dwt
+  
+  original::Array{Float64}
+  L::Int
+  series::Int
+  level::Int
+  filter::waveletFilter
+  boundary::ASCIIString
+  W::Array{Float64, 3}
+  V::Array{Float64, 3}
+
+  function dwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
+    filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, false))
+
+    if isa(X, Vector)
+      (N,) = size(X)
+      nSeries = 1
+    else
+      (N, nSeries) = size(X)
+    end
+
+    (W, V) = dwtDo(X, filter, nLevels, boundary, nSeries, N)
+    
+    new(X, N, nSeries, nLevels, filter, boundary, W, V)
+
+  end
+
+end
+
+
 function dwtBackwards(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter)
   (M, ) = size(V)
   (L, ) = size(filter.h)
@@ -58,17 +88,7 @@ function dwtForward(V::Vector{Float64}, filter::waveletFilter)
   return (Wj, Vj)
 end
 
-function dwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
-  filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, false))
-
-  # convert X to a matrix
-  if isa(X, Vector)
-    (N,) = size(X)
-    nSeries = 1
-  else
-    (N, nSeries) = size(X)
-  end
-
+function dwtDo(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString, nSeries::Int, N::Int)
   # reflect X for reflection method
   if (boundary == "reflection")
     X = extendSeries(X, boundary)
