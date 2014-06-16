@@ -34,8 +34,8 @@ for i in boundaries, j in filters, l in levels
 	W = readcsv("W.csv")
 	V = readcsv("V.csv")
 	(Wjl, Vjl) = dwt(data[1:512,1], j, l, i)
-	@assert all(abs(Wjl - W) .< 2.220446049250313e-12)
-	@assert all(abs(Vjl - V) .< 2.220446049250313e-12)
+	@assert all((abs(Wjl - W) .< 2.220446049250313e-12) $ (isnan(abs(Wjl - W))))
+	@assert all((abs(Vjl - V) .< 2.220446049250313e-12) $ (isnan(abs(Vjl - V))))
 end
 
 

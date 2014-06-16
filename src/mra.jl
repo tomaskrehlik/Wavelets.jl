@@ -32,7 +32,7 @@ function mraDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary:
   S = fill(0.0, N, nLevels, nSeries)
 
   # compute wavelet transform and other necessary values
-  decomp = eval(Expr(:call, symbol(method), X, filter.wtName, 1, boundary))
+  decomp = eval(Expr(:call, symbol(method), X, filter.wtName, nLevels, boundary))
   (wtW, wtV) = (decomp.W, decomp.V)
   (N, nLevels, nSeries) = size(wtW)
 
