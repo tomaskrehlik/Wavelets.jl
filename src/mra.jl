@@ -27,14 +27,13 @@ type mra
 
 end
 
-function mraDo(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString, method::ASCIIString, nSeries::Int, N::Int)
+function mraDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary::ASCIIString, method::ASCIIString, nSeries::Int, N::Int)
   D = fill(0.0, N, nLevels, nSeries)
   S = fill(0.0, N, nLevels, nSeries)
 
   # compute wavelet transform and other necessary values
-  (wtW, wtV) = eval(Expr(:call, symbol(method), X, filter, 1, boundary))
-  filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, method=="modwt" ? true : false))
-
+  decomp = eval(Expr(:call, symbol(method), X, filter, 1, boundary))
+  (wtW, wtV) = (decomp.W, decomp.V)
   (N, nLevels, nSeries) = size(wtW)
 
   # compute the details and smooths
