@@ -97,3 +97,19 @@ function modwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundar
   
   return (WCoefs, VCoefs)
 end
+
+function imodwtDo(wt::modwt)
+  output = fill(0.0, wt.L, wt.series)
+
+  for i=1:wt.series
+    Vj = convert(Vector, wt.V[:,end,i])
+    for j=wt.level:-1:1
+      Vj = modwtBackward(convert(Vector, wt.W[:,j,i]), Vj, wt.filter, j)
+      Vj = convert(Vector, Vj)
+    end
+    output[:,i] = Vj
+  end
+
+  return output
+
+end

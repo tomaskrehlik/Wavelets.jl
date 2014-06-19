@@ -89,6 +89,22 @@ function dwtForward(V::Vector{Float64}, filter::waveletFilter)
   return (Wj, Vj)
 end
 
+function idwtDo(wt::dwt)
+  output = fill(0.0, wt.L, wt.series)
+
+  for i=1:wt.series
+    Vj = convert(Vector, wt.V[:,end,i])
+    for j=wt.level:-1:1
+      Vj = modwtBackward(Vj, wt.filter)
+      Vj = convert(Vector, Vj)
+    end
+    output[:,i] = Vj
+  end
+
+  return output
+  
+end
+
 function dwtDo(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString, nSeries::Int, N::Int)
   # reflect X for reflection method
   if (boundary == "reflection")

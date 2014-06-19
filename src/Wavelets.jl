@@ -2,7 +2,8 @@ module Wavelets
 
 	export 	modwt,
 			mra,
-			dwt
+			dwt,
+			inverse
 
 	abstract WaveletTransform
 
@@ -11,5 +12,11 @@ module Wavelets
 	include("dwt.jl")
 	include("modwt.jl")
 	include("mra.jl")
+
+	# Defining global inverse function for any wavelet transform
+
+	function inverse(wt::WaveletTransform)
+		return eval(Expr(:call, symbol(string("i", typeof(wt),"Do")), wt))
+	end
 
 end # module
