@@ -61,6 +61,7 @@ function dwtBackwards(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFil
   return Vj
 end
 
+# Defined because of the MRA
 
 function dwtBackwards(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter, j::Int)
 	return dwtBackwards(W, V, filter)

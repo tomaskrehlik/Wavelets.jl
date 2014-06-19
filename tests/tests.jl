@@ -15,7 +15,8 @@ for i in boundaries, j in filters, l in levels
 	run(`Rscript modwt.R $j $l $i`)
 	W = readcsv("W.csv")
 	V = readcsv("V.csv")
-	(Wjl, Vjl) = modwt(data[:,1], j, l, i)
+	decomp = modwt(data[:,1], j, l, i)
+	(Wjl, Vjl) = (decomp.W, decomp.V)
 	@assert all(abs(Wjl - W) .< 2.220446049250313e-12)
 	@assert all(abs(Vjl - V) .< 2.220446049250313e-12)
 end
@@ -33,7 +34,8 @@ for i in boundaries, j in filters, l in levels
 	run(`Rscript dwt.R $j $l $i`)
 	W = readcsv("W.csv")
 	V = readcsv("V.csv")
-	(Wjl, Vjl) = dwt(data[1:512,1], j, l, i)
+	decomp = dwt(data[1:512,1], j, l, i)
+	(Wjl, Vjl) = (decomp.W, decomp.V)
 	@assert all((abs(Wjl - W) .< 2.220446049250313e-12) $ (isnan(abs(Wjl - W))))
 	@assert all((abs(Vjl - V) .< 2.220446049250313e-12) $ (isnan(abs(Vjl - V))))
 end
@@ -49,7 +51,8 @@ for i in boundaries, j in filters, l in levels
 	run(`Rscript mra.R $j $l $i modwt`)
 	D = readcsv("D.csv")
 	S = readcsv("S.csv")
-	(Djl, Sjl) = mra(data[:,1], j, l, i, "modwt")
+	decomp = = modwt(data[:,1], j, l, i)
+	(Djl, Sjl) = mra(decomp)
 	@assert all(abs(Djl - D) .< 2.220446049250313e-12)
 	@assert all(abs(Sjl - S) .< 2.220446049250313e-12)
 end
