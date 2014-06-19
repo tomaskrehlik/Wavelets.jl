@@ -1,4 +1,4 @@
-type dwt
+immutable dwt <: WaveletTransform
   
   original::Array{Float64}
   L::Int

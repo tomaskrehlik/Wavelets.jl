@@ -4,6 +4,8 @@ module Wavelets
 			mra,
 			dwt
 
+	abstract WaveletTransform
+
 	include("waveletFilters.jl")
 	include("extendSeries.jl")
 	include("dwt.jl")

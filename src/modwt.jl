@@ -1,4 +1,4 @@
-type modwt
+immutable modwt <: WaveletTransform
   
   original::Array{Float64}
   L::Int
