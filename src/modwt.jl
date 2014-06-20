@@ -8,6 +8,7 @@ immutable modwt <: WaveletTransform
   boundary::ASCIIString
   W::Array{Float64, 3}
   V::Array{Float64, 3}
+  aligned::Bool
 
   function modwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
     filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, true))
@@ -21,7 +22,7 @@ immutable modwt <: WaveletTransform
 
     (W, V) = modwtDo(X, filter, nLevels, boundary, nSeries, N)
     
-    new(X, N, nSeries, nLevels, filter, boundary, W, V)
+    new(X, N, nSeries, nLevels, filter, boundary, W, V, false)
 
   end
 
@@ -75,7 +76,7 @@ end
 function modwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary::ASCIIString, nSeries::Int, N::Int)
   # reflect X for reflection method
   if (boundary == "reflection")
-    X = extendSeries(X, boundary)
+    X = extendSeries(X, boundary, "double")
     N = 2*N
   end
 

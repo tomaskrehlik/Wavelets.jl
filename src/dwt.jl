@@ -8,6 +8,7 @@ immutable dwt <: WaveletTransform
   boundary::ASCIIString
   W::Array{Float64, 3}
   V::Array{Float64, 3}
+  aligned::Bool
 
   function dwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
     filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, false))
@@ -21,14 +22,14 @@ immutable dwt <: WaveletTransform
 
     (W, V) = dwtDo(X, filter, nLevels, boundary, nSeries, N)
     
-    new(X, N, nSeries, nLevels, filter, boundary, W, V)
+    new(X, N, nSeries, nLevels, filter, boundary, W, V, false)
 
   end
 
 end
 
 
-function dwtBackwards(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter)
+function dwtBackward(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter)
   (M, ) = size(V)
   (L, ) = size(filter.h)
   Vj = fill(NaN, 2*M)
@@ -63,8 +64,8 @@ end
 
 # Defined because of the MRA
 
-function dwtBackwards(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter, j::Int)
-	return dwtBackwards(W, V, filter)
+function dwtBackward(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter, j::Int)
+	return dwtBackward(W, V, filter)
 end
 
 function dwtForward(V::Vector{Float64}, filter::waveletFilter)
@@ -105,7 +106,7 @@ function idwtDo(wt::dwt)
   
 end
 
-function dwtDo(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString, nSeries::Int, N::Int)
+function dwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary::ASCIIString, nSeries::Int, N::Int)
   # reflect X for reflection method
   if (boundary == "reflection")
     X = extendSeries(X, boundary)

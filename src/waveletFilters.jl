@@ -14,6 +14,8 @@ type waveletFilter
 	end
 end
 
+# Some basic functions
+
 function wtFilterEquivalent(wtFilter::waveletFilter, J::Int64)
   LLast = wtFilter.L
   hLast = wtFilter.h
@@ -65,6 +67,112 @@ function wtFilterQmf(x::Vector, inverse::Bool)
   inverse ? (y = x[L:-1:1].*(-1).^((1:L)-1)) : (y = x[L:-1:1].*(-1).^(1:L))
   return y
 end
+
+function wtFilterShift(wt::waveletFilter, J::Int, wavelet::Bool, coe::Bool, modwt::Bool)
+  if (!coe) 
+    if wt.wtClass == "Daubechies"
+      wt.L == 2 && (ν = 0)
+      wt.L == 4 && (ν = 1)
+    elseif wt.wtClass == "Least Asymmetric"
+      wt.L == 8 && (δ = 1)
+      wt.L == 10 && (δ = 0)
+      wt.L == 12 && (δ = 1)
+      wt.L == 14 && (δ = 2)
+      wt.L == 16 && (δ = 1)
+      wt.L == 18 && (δ = 0)
+      wt.L == 20 && (δ = 1)
+      
+      ν = abs(-(wt.L/2) + δ)
+
+    elseif wt.wtClass == "Coiflet"
+      ν <- abs(-2*wt.L/3 + 1)
+    elseif wt.wtClass == "Best Localized"
+      L == 14 && (ν <- 5)
+      L == 18 && (ν <- 11)
+      L == 20 && (ν <- 9)
+    else
+      ν = sum([1:(wt.L-1)]*filter.g[2:end].^2)./sum(filter.g^2)
+    end
+  else
+    ν = sum([1:(wt.L-1)]*filter.g[2:end].^2)./sum(filter.g^2)
+  end
+
+  # calculate shift for each j > 1 (equation 114c)
+  if wt.wtName != "haar"
+    if wavelet
+      shift = [j > 1 ? (2^(j-1))*(wt.L-1) - ν : wt.L - ν - 1 for j=1:J]
+    else
+      shift = [j > 1 ? (2^j -1)*ν : ν for j=1:J]
+    end
+  else
+    if !modwt
+      shift = 0^J
+    else
+      shift = 2^(J-1)
+    end
+  end
+
+  # calculate shift for dwt
+  if wt.transform == "dwt"
+    shift = ceil(((shift+1)./(2^J))-1)
+  end
+
+  return shift
+end
+
+function waveletShiftDwt(L::Int, j::Int)
+    @assert L % 2 == 0
+    
+    Lj = ((2^j)-1)*(L-1) + 1
+
+    vjH = -Lj/2
+    L == 10 && (vjH = (-Lj/2) + 1)
+    L == 14 && (vjH = (-Lj/2) - 1)
+    L == 18 && (vjH = (-Lj/2) + 1)
+
+    return abs(vjH)
+end
+
+function waveletShiftDwt(L::Int, j::Int, N::Int)
+    @assert L % 2 == 0
+    
+    Lj = ((2^j)-1)*(L-1) + 1
+
+    vjH = -Lj/2
+    L == 10 && (vjH = (-Lj/2) + 1)
+    L == 14 && (vjH = (-Lj/2) - 1)
+    L == 18 && (vjH = (-Lj/2) + 1)
+    
+    return abs(vjH)%N
+end
+
+function scalingShiftDwt(L::Int, j::Int)
+    @assert L % 2 == 0
+    
+    Lj = ((2^j)-1)*(L-1) + 1
+
+    vjG = -((Lj-1)*(L-2))/(2*(L-1))
+    L == 10 && (vjG = -((Lj-1)*L)/(2*(L-1)))
+    L == 14 && (vjG = -((Lj-1)*(L-4))/(2*(L-1)))
+    L == 18 && (vjG = -((Lj-1)*L)/(2*(L-1)))
+
+    return abs(vjG)
+end
+
+function scalingShiftDwt(L::Int, j::Int, N::Int)
+    @assert L % 2 == 0
+    
+    Lj = ((2^j)-1)*(L-1) + 1
+
+    vjG = -((Lj-1)*(L-2))/(2*(L-1))
+    L == 10 && (vjG = -((Lj-1)*L)/(2*(L-1)))
+    L == 14 && (vjG = -((Lj-1)*(L-4))/(2*(L-1)))
+    L == 18 && (vjG = -((Lj-1)*L)/(2*(L-1)))
+    
+    return abs(vjG)%N
+end
+
+# Definitions of the filters themselves
 
 function haarFilter(level::Int, modwt::Bool)
 	class = "Daubechies"
