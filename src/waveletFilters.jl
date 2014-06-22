@@ -87,9 +87,9 @@ function wtFilterShift(wt::waveletFilter, J::Int, wavelet::Bool, coe::Bool, modw
     elseif wt.wtClass == "Coiflet"
       ν <- abs(-2*wt.L/3 + 1)
     elseif wt.wtClass == "Best Localized"
-      L == 14 && (ν <- 5)
-      L == 18 && (ν <- 11)
-      L == 20 && (ν <- 9)
+      L == 14 && (ν = 5)
+      L == 18 && (ν = 11)
+      L == 20 && (ν = 9)
     else
       ν = sum([1:(wt.L-1)]*filter.g[2:end].^2)./sum(filter.g^2)
     end
