@@ -121,7 +121,7 @@ function wtFilterShift(wt::waveletFilter, J::Int, wavelet::Bool, coe::Bool, modw
 end
 
 function waveletShiftDwt(L::Int, j::Int)
-    @assert L % 2 == 0
+    @assert L % 2 == 0 "Length of the filter should be even!"
     
     Lj = ((2^j)-1)*(L-1) + 1
 
@@ -134,7 +134,7 @@ function waveletShiftDwt(L::Int, j::Int)
 end
 
 function waveletShiftDwt(L::Int, j::Int, N::Int)
-    @assert L % 2 == 0
+    @assert L % 2 == 0 "Length of the filter should be even!"
     
     Lj = ((2^j)-1)*(L-1) + 1
 
@@ -147,7 +147,7 @@ function waveletShiftDwt(L::Int, j::Int, N::Int)
 end
 
 function scalingShiftDwt(L::Int, j::Int)
-    @assert L % 2 == 0
+    @assert L % 2 == 0 "Length of the filter should be even!"
     
     Lj = ((2^j)-1)*(L-1) + 1
 
@@ -160,7 +160,7 @@ function scalingShiftDwt(L::Int, j::Int)
 end
 
 function scalingShiftDwt(L::Int, j::Int, N::Int)
-    @assert L % 2 == 0
+    @assert L % 2 == 0 "Length of the filter should be even!"
     
     Lj = ((2^j)-1)*(L-1) + 1
 

@@ -11,14 +11,16 @@ immutable dwt <: WaveletTransform
   aligned::Bool
 
   function dwt(X::Array{Float64}, filter::ASCIIString, nLevels::Int, boundary::ASCIIString)
-    filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, false))
-
     if isa(X, Vector)
       (N,) = size(X)
       nSeries = 1
     else
       (N, nSeries) = size(X)
     end
+
+    #@assert log(N)%log(2)<eps() "The length of the series should be 2^J."
+
+    filter = eval(Expr(:call, symbol(string(filter,"Filter")), 1, false))
 
     (W, V) = dwtDo(X, filter, nLevels, boundary, nSeries, N)
     
@@ -90,6 +92,41 @@ function dwtForward(V::Vector{Float64}, filter::waveletFilter)
   return (Wj, Vj)
 end
 
+function dwtForward!(orig::Array{Float64}, W::Array{Float64}, V::Array{Float64}, filter::waveletFilter, levels::Int, series::Int)
+  @inbounds begin
+    for i=1:series
+      for l=1:levels
+        if l==1
+          M = length(orig)
+          for (t = 1:(M/2))
+            u = 2*(t-1) + 1
+            W[t, l, i] = filter.h[1]*orig[u+1,i]
+            V[t, l, i] = filter.g[1]*orig[u+1,i]
+            for (n = 2:filter.L)
+              u <= 0 ? (u = M - 1) : (u -= 1)
+              W[t, l, i] += filter.h[n]*orig[u+1,i]
+              V[t, l, i] += filter.g[n]*orig[u+1,i]
+            end
+          end  
+        else
+          M = convert(Int, length(orig)/(2^l))
+          for (t = 1:(M/2))
+            u = 2*(t-1) + 1
+            W[t, l, i] = filter.h[1]*V[u+1,l-1,i]
+            V[t, l, i] = filter.g[1]*V[u+1,l-1,i]
+            for (n = 2:filter.L)
+              u <= 0 ? (u = M - 1) : (u -= 1)
+              W[t, l, i] += filter.h[n]*V[u+1,l-1,i]
+              V[t, l, i] += filter.g[n]*V[u+1,l-1,i]
+            end
+          end  
+        end
+      end
+    end
+  end
+  return nothing
+end
+
 function idwtDo(wt::dwt)
   output = fill(0.0, wt.L, wt.series)
 
@@ -119,14 +156,10 @@ function dwtDo(X::Array{Float64}, filter::waveletFilter, nLevels::Int, boundary:
   VCoefs = fill(NaN, convert(Int64,N/2), nLevels, nSeries)
 
   # implement the pyramid algorithm
+  dwtForward!(X, WCoefs, VCoefs, filter, nLevels, nSeries)
   for i=1:nSeries
-    Vj = X[:,i]
     for j=1:nLevels
-      (WCoefs[1:(N/(2^j)),j,i], VCoefs[1:(N/(2^j)),j,i]) = dwtForward(Vj,filter)
-      Vj = convert(Vector, VCoefs[1:(N/(2^j)),j,i])
-      Lj = ceil((filter.L-2)*(1-(1/(2^j))))
-      Nj = N/(2^j)
-      nBoundary[j] = min(Lj,Nj)
+      nBoundary[j] = min(ceil((filter.L-2)*(1-(1/(2^j)))), N/(2^j))
     end
   end
 

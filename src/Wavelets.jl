@@ -3,7 +3,9 @@ module Wavelets
 	export 	modwt,
 			mra,
 			dwt,
-			inverse
+			inverse,
+			dwtDo,
+			haarFilter
 
 	abstract WaveletTransform
 
