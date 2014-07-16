@@ -28,28 +28,46 @@ immutable modwt <: WaveletTransform
 
 end
 
+# Old version which is about 2 times slower
+# function modwtForward(V::Vector{Float64}, filter::waveletFilter, j::Int)
+#   (N,) = size(V)
+#   Wj = fill(NaN, N)
+#   Vj = fill(NaN, N)
+  
+#   for t = 0:(N-1) 
+#     k = t
+#     Wjt = filter.h[1]*V[k+1]
+#     Vjt = filter.g[1]*V[k+1]
+#     for n = 1:(filter.L-1) 
+#       k = k - 2^(j-1)
+#       if (k < 0)
+#         k = k + ceil(-k/N)*N
+#       end
+#       Wjt = Wjt + filter.h[n+1]*V[k+1]
+#       Vjt = Vjt + filter.g[n+1]*V[k+1]
+#     end
+#     Wj[t+1] = Wjt
+#     Vj[t+1] = Vjt    
+#   end
+  
+#   return (Wj, Vj)
+# end
+
 function modwtForward(V::Vector{Float64}, filter::waveletFilter, j::Int)
   (N,) = size(V)
-  Wj = fill(NaN, N)
-  Vj = fill(NaN, N)
-  
-  for t = 0:(N-1) 
-    k = t
-    Wjt = filter.h[1]*V[k+1]
-    Vjt = filter.g[1]*V[k+1]
-    for n = 1:(filter.L-1) 
-      k = k - 2^(j-1)
-      if (k < 0)
-        k = k + ceil(-k/N)*N
+
+  indeces = fill(0, N, filter.L)
+  for i=1:N
+    indeces[i, 1] = i
+    for k=2:filter.L
+      indeces[i, k] = indeces[i, k-1] - 2^(j-1)
+      if indeces[i, k] <= 0
+        indeces[i, k] = N + indeces[i, k]
       end
-      Wjt = Wjt + filter.h[n+1]*V[k+1]
-      Vjt = Vjt + filter.g[n+1]*V[k+1]
     end
-    Wj[t+1] = Wjt
-    Vj[t+1] = Vjt    
   end
-  
-  return (Wj, Vj)
+
+  return (filter.h' * V[indeces]', filter.g' * V[indeces]')
 end
 
 function modwtBackward(W::Vector{Float64}, V::Vector{Float64}, filter::waveletFilter, j::Int)
