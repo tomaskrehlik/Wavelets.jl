@@ -5,6 +5,8 @@ module Wavelets
 			dwt,
 			inverse,
 			dwtDo,
+			modwtDo,
+			modwtNew,
 			haarFilter
 
 	abstract WaveletTransform
